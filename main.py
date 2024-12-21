@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 from transformers import pipeline
-import sounddevice as sd
+# import sounddevice as sd
 import scipy.io.wavfile as wav
 import soundfile as sf
 import torchaudio
@@ -15,6 +15,7 @@ import os
 import librosa
 import io
 # from transformers import WhisperProcessor, WhisperForConditionalGeneration
+from audio_recorder_streamlit import audio_recorder
 
 # load_dotenv()
 
@@ -86,17 +87,37 @@ with col1:
     duration = st.number_input('Enter Recording duration', max_value=90,
                                    min_value=1, step=1,
                                    format = '%d', value=1)
-    if st.button('Start Recording'):
-        st.write('Recording')
-        audio = sd.rec(int(duration * samplerate), samplerate=samplerate, channels=1, dtype='float32')
-        audio = audio.reshape(-1)
-        sd.wait()
-        # output_file = "recording.wav"
-        # sf.write(output_file, audio, samplerate)
-        st.success("Recording Success")
-        # st.audio(output_file)
-        result = transcribe_audio(audio)
-        st.write(f'Transcribed audio: {result}')
+    # if st.button('Start'):
+        # audio = sd.rec(int(duration * samplerate), samplerate=samplerate, channels=1, dtype='float32')
+        # audio = audio.reshape(-1)
+        # sd.wait()
+    audio_bytes = audio_recorder()
+    # print(audio_bytes)
+    if audio_bytes:
+        st.audio(audio_bytes, format="audio/wav")
+        # st.write('Click image to record')
+        # audio_bytes = audio_recorder(text="",
+        #                              recording_color="#e8b62c",
+        #                              neutral_color="#6aa36f",
+        #                            icon_name="user",icon_size="6x", pause_threshold=duration, energy_threshold=0)
+        # print(audio_bytes)
+        # if audio_bytes:
+        #     st.write('Recording')
+        #     st.audio(audio_bytes, format="audio/wav")
+        #
+        try:
+            audio_stream = io.BytesIO(audio_bytes)
+            audio, sample_rate = librosa.load(audio_stream, sr=None, mono=True)
+
+            # st.write(f"Audio length: {len(audio)} samples")
+            # st.write(f"Sample rate: {sample_rate} Hz")
+
+            result = transcribe_audio(audio)
+            st.write(':blue[Transcription:]')
+            st.write(result)
+
+        except Exception as e:
+            st.error(f"Error processing audio: {str(e)}")
 
 with col2:
     st.header(':blue[Upload Audio]')
