@@ -14,6 +14,7 @@ import os
 # from tqdm import tqdm
 import librosa
 import io
+# from transformers import WhisperProcessor, WhisperForConditionalGeneration
 
 # load_dotenv()
 
@@ -28,14 +29,21 @@ st.markdown(
 col1, col2= st.columns(2)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-cwd = os.getcwd()
-model_path = os.path.join('downloads', 'whisper-finetuned9512')
-print(model_path)
+# cwd = os.getcwd()
+# model_path = os.path.join('downloads', 'whisper-finetuned9512')
+# print(model_path)
 pipe = pipeline(task='automatic-speech-recognition',
-                model=model_path,
+                model='Humphery7/africanaccented_englishfinetuned',
                 chunk_length_s=30,
                 stride_length_s=(15, 3),
                 device=device)
+
+# token = "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"
+
+# model = WhisperForConditionalGeneration.from_pretrained(model_path)
+# processor = WhisperProcessor.from_pretrained(model_path)
+# model.push_to_hub('Humphery7/africanaccented_englishfinetuned')
+# processor.push_to_hub('Humphery7/africanaccented_englishfinetuned')
 
 samplerate = 16000
 MAX_DURATION = 90
